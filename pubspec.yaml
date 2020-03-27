@@ -20,6 +20,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  bitcoin_flutter: ^2.0.0
+  encrypt: ^4.0.0
+  ckb_sdk_dart: ^0.30.2
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
