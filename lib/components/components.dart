@@ -37,7 +37,7 @@ Widget mainPenal(Widget business) {
       width: 580,
       height: 474,
       decoration: BoxDecoration(
-        border: new Border.all(color: Colors.white, width: 1), // 边色与边宽度
+        border: new Border.all(color: Colors.white, width: 1),
         borderRadius: new BorderRadius.only(bottomLeft: Radius.circular(82), bottomRight: Radius.circular(82)),
       ),
       child: business,
