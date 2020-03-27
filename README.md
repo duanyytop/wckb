@@ -1,2 +1,3 @@
-# wckb-app
-WCKB Application
+# wckb
+
+Wrapped Nervos DAO CKB Application
