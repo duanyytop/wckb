@@ -24,6 +24,7 @@ class TransferPage extends StatefulWidget {
 
 class _TransferPageState extends State<TransferPage> {
   Tab _tab = Tab.Swap;
+  Swap _swap = Swap.ToWCKB;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +58,13 @@ class _TransferPageState extends State<TransferPage> {
                             child: tabWidget(_tab == Tab.Send, 'Send'))
                       ],
                     ),
-                    _tab == Tab.Swap ? swapWidget() : transferWidget(),
+                    _tab == Tab.Swap
+                        ? swapWidget(_swap, () {
+                            setState(() {
+                              _swap = _swap == Swap.ToCKB ? Swap.ToWCKB : Swap.ToCKB;
+                            });
+                          })
+                        : transferWidget(),
                   ],
                 )),
                 balanceWidget('1223434.3434', '2343434.45656', '12334')
@@ -66,7 +73,7 @@ class _TransferPageState extends State<TransferPage> {
   }
 }
 
-Widget swapWidget() {
+Widget swapWidget(Swap swap, Function switchSwap) {
   return Column(
     children: <Widget>[
       Padding(
@@ -78,24 +85,40 @@ Widget swapWidget() {
                 border: new Border.all(color: Color(GRAY_COLOR), width: 1),
                 color: Color(0x0ff1c1d20),
                 borderRadius: new BorderRadius.all(Radius.circular(45))),
-            child: inputWidget('Wallet Name *', false, (value) {
-              print(value);
-            })),
+            child: Stack(
+              children: <Widget>[
+                inputWidget('Input', false, (value) {
+                  print(value);
+                }),
+                Positioned(
+                  left: 400,
+                  top: 27,
+                  child: Text(
+                    swap == Swap.ToCKB ? 'WCKB' : 'CKB',
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
+                )
+              ],
+            )),
       ),
       Padding(
-        padding: EdgeInsets.only(top: 14),
+        padding: EdgeInsets.only(top: 16),
         child: Center(
           child: SizedBox(
             width: 34,
             height: 34,
-            child: Image(
-              image: AssetImage('assets/images/transfer.jpg'),
-            ),
+            child: GestureDetector(
+                onTap: () {
+                  switchSwap();
+                },
+                child: Image(
+                  image: AssetImage('assets/images/transfer.jpg'),
+                )),
           ),
         ),
       ),
       Padding(
-        padding: EdgeInsets.only(top: 14),
+        padding: EdgeInsets.only(top: 16),
         child: Container(
           width: 490,
           height: 73,
@@ -103,9 +126,21 @@ Widget swapWidget() {
               border: new Border.all(color: Color(GRAY_COLOR), width: 1),
               color: Color(0x0ff1c1d20),
               borderRadius: new BorderRadius.all(Radius.circular(45))),
-          child: inputWidget('Confirm Password *', true, (value) {
-            print(value);
-          }),
+          child: Stack(
+            children: <Widget>[
+              inputWidget('Output', false, (value) {
+                print(value);
+              }),
+              Positioned(
+                left: 400,
+                top: 27,
+                child: Text(
+                  swap == Swap.ToCKB ? 'CKB' : 'WCKB',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
+              )
+            ],
+          ),
         ),
       ),
       Padding(
@@ -120,7 +155,7 @@ Widget swapWidget() {
               shape: new RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(33.0), side: BorderSide(color: Color(GREEN_COLOR))),
               child: Text(
-                "Confirm",
+                "Swap",
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
@@ -141,9 +176,21 @@ Widget transferWidget() {
                 border: new Border.all(color: Color(GRAY_COLOR), width: 1),
                 color: Color(0x0ff1c1d20),
                 borderRadius: new BorderRadius.all(Radius.circular(45))),
-            child: inputWidget('Wallet Name *', false, (value) {
-              print(value);
-            })),
+            child: Stack(
+              children: <Widget>[
+                inputWidget('Amount', false, (value) {
+                  print(value);
+                }),
+                Positioned(
+                  left: 400,
+                  top: 27,
+                  child: Text(
+                    'WCKB',
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
+                )
+              ],
+            )),
       ),
       Padding(
         padding: EdgeInsets.only(top: 14),
@@ -154,7 +201,7 @@ Widget transferWidget() {
               border: new Border.all(color: Color(GRAY_COLOR), width: 1),
               color: Color(0x0ff1c1d20),
               borderRadius: new BorderRadius.all(Radius.circular(45))),
-          child: inputWidget('Password *', true, (value) {
+          child: inputWidget('From', true, (value) {
             print(value);
           }),
         ),
@@ -168,7 +215,7 @@ Widget transferWidget() {
               border: new Border.all(color: Color(GRAY_COLOR), width: 1),
               color: Color(0x0ff1c1d20),
               borderRadius: new BorderRadius.all(Radius.circular(45))),
-          child: inputWidget('Confirm Password *', true, (value) {
+          child: inputWidget('To', true, (value) {
             print(value);
           }),
         ),
@@ -196,7 +243,7 @@ Widget transferWidget() {
 
 Widget inputWidget(String title, bool isPassword, Function onChanged) {
   return Padding(
-      padding: EdgeInsets.only(left: 30, right: 30, top: 5),
+      padding: EdgeInsets.only(left: 30, right: 0, top: 5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -221,3 +268,5 @@ Widget inputWidget(String title, bool isPassword, Function onChanged) {
 }
 
 enum Tab { Swap, Send }
+
+enum Swap { ToWCKB, ToCKB }
