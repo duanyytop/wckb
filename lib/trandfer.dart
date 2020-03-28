@@ -3,21 +3,22 @@ import 'dart:async';
 import 'package:ckb_sdk_dart/ckb_core.dart';
 import 'package:ckb_sdk_dart/ckb_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 import 'package:wckb/components/components.dart';
 import 'package:wckb/utils/const.dart';
+import 'package:wckb/utils/crypto.dart';
 import 'package:wckb/wallet/wallet.dart';
+import 'package:wckb/wallet/wckb.dart';
 
 var _screenWidth = 0.0;
 var _screenHeight = 0.0;
 final _api = Api('http://localhost:8114');
 Timer _timer;
-var _walletName = '';
 
 class Transfer extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    _walletName = ModalRoute.of(context).settings.arguments;
     return Scaffold(
         backgroundColor: Color(0xff3c3e45),
         appBar: AppBar(
@@ -31,6 +32,10 @@ class Transfer extends StatelessWidget {
   }
 }
 
+String _tempPassword = '';
+Wallet _wallet;
+String _swapAmount = '0';
+
 class TransferPage extends StatefulWidget {
   TransferPage({Key key}) : super(key: key);
 
@@ -43,13 +48,28 @@ class _TransferPageState extends State<TransferPage> {
   Swap _swap = Swap.ToWCKB;
   String _blockNumber = '0';
   String _ckbBalance = '0';
-  Wallet _wallet;
+  String _wckbBalance = '0';
 
   @override
   void initState() {
     _api.getTipBlockNumber().then((blockNumber) {
       setState(() {
         _blockNumber = '${hexToInt(blockNumber)}';
+      });
+    });
+    Wallet.getWallet().then((wallet) {
+      setState(() {
+        _wallet = wallet;
+      });
+      _wallet.getCKBBalance(_api).then((balance) {
+        setState(() {
+          _ckbBalance = balance;
+        });
+      });
+      _wallet.getWCKBBalance(_api).then((balance) {
+        setState(() {
+          _wckbBalance = balance;
+        });
       });
     });
     Timer.periodic(Duration(seconds: 5), (Timer timer) {
@@ -59,15 +79,19 @@ class _TransferPageState extends State<TransferPage> {
           _blockNumber = '${hexToInt(blockNumber)}';
         });
       });
-    });
-
-    Wallet.getWallet(_walletName).then((wallet) {
-      setState(() {
-        _wallet = wallet;
-      });
-      _wallet.getCKBBalance(_api).then((balance) {
+      Wallet.getWallet().then((wallet) {
         setState(() {
-          _ckbBalance = balance;
+          _wallet = wallet;
+        });
+        _wallet.getCKBBalance(_api).then((balance) {
+          setState(() {
+            _ckbBalance = balance;
+          });
+        });
+        _wallet.getWCKBBalance(_api).then((balance) {
+          setState(() {
+            _wckbBalance = balance;
+          });
         });
       });
     });
@@ -112,7 +136,7 @@ class _TransferPageState extends State<TransferPage> {
                   ],
                 ),
                 _tab == Tab.Swap
-                    ? swapWidget(_swap, () {
+                    ? swapWidget(context, _swap, () {
                         setState(() {
                           _swap = _swap == Swap.ToCKB ? Swap.ToWCKB : Swap.ToCKB;
                         });
@@ -120,13 +144,13 @@ class _TransferPageState extends State<TransferPage> {
                     : transferWidget(),
               ],
             )),
-            balanceWidget(_ckbBalance, '1223434.3434', _blockNumber)
+            balanceWidget(_ckbBalance, _wckbBalance, _blockNumber)
           ],
         ));
   }
 }
 
-Widget swapWidget(Swap swap, Function switchSwap) {
+Widget swapWidget(BuildContext context, Swap swap, Function switchSwap) {
   return Column(
     children: <Widget>[
       Padding(
@@ -141,7 +165,7 @@ Widget swapWidget(Swap swap, Function switchSwap) {
             child: Stack(
               children: <Widget>[
                 inputWidget('Input', false, (value) {
-                  print(value);
+                  _swapAmount = value;
                 }),
                 Positioned(
                   left: 400,
@@ -182,7 +206,7 @@ Widget swapWidget(Swap swap, Function switchSwap) {
           child: Stack(
             children: <Widget>[
               inputWidget('Output', false, (value) {
-                print(value);
+                _swapAmount = value;
               }),
               Positioned(
                 left: 400,
@@ -203,7 +227,9 @@ Widget swapWidget(Swap swap, Function switchSwap) {
             height: 40,
             child: RaisedButton(
               textColor: Colors.white,
-              onPressed: () {},
+              onPressed: () async {
+                _showInputDialog(context);
+              },
               color: Color(GREEN_COLOR),
               shape: new RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(33.0), side: BorderSide(color: Color(GREEN_COLOR))),
@@ -318,6 +344,53 @@ Widget inputWidget(String title, bool isPassword, Function onChanged) {
           ),
         ],
       ));
+}
+
+Future<String> _showInputDialog(BuildContext context) async {
+  return showDialog<String>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Enter wallet password'),
+        content: new Row(
+          children: <Widget>[
+            new Expanded(
+                child: new TextField(
+              autofocus: true,
+              obscureText: true,
+              decoration: new InputDecoration(labelText: 'Wallet password'),
+              onChanged: (password) {
+                _tempPassword = password;
+              },
+            ))
+          ],
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          FlatButton(
+            child: Text('OK'),
+            onPressed: () async {
+              var privateKey = decrypt(_wallet.encryptKey, _tempPassword);
+              try {
+                var transaction = await generateWckbTx(
+                    _api, ckbToShannon(number: int.parse(_swapAmount)), privateKey, _wallet.address);
+                var txHash = await _api.sendTransaction(transaction);
+                Navigator.of(context).pop();
+                Toast.show("Swap success", context, duration: Toast.LENGTH_SHORT, gravity: Toast.CENTER);
+                print('ckb swap wckb tx hash: $txHash');
+              } catch (e) {
+                Toast.show("Swap fail", context, duration: Toast.LENGTH_SHORT, gravity: Toast.CENTER);
+              }
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
 
 enum Tab { Swap, Send }

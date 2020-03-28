@@ -10,8 +10,8 @@ String encrypt(String origin, String password) {
 }
 
 String decrypt(String encrypted, String password) {
-  final key = Key.fromUtf8(password);
+  final key = Key(hexToList(Blake2b.hash(password)));
   final iv = IV.fromLength(16);
   final encrypt = Encrypter(AES(key));
-  return encrypt.decrypt(Encrypted.fromUtf8(encrypted), iv: iv);
+  return encrypt.decrypt(Encrypted(hexToList(encrypted)), iv: iv);
 }

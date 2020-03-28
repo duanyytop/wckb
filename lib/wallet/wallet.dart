@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:ckb_sdk_dart/ckb_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wckb/utils/const.dart';
 import 'package:wckb/utils/utils.dart';
 import 'package:wckb/wallet/transaction/cell_collector.dart';
+import 'package:wckb/wallet/wckb/wckb_cell_collector.dart';
 
 class Wallet {
   String name;
@@ -31,17 +33,23 @@ class Wallet {
     return shannonToCkb((await cellCollector.getCapacityWithAddress(address)).toRadixString(10)).toString();
   }
 
+  Future<String> getWCKBBalance(Api api) async {
+    var cellCollector = WCKBCellCollector(api);
+    var daoCodeHash = await SystemContract.getDaoCodeHash(api: api);
+    var wckbType = Script(codeHash: WCKB_CODE_HASH, args: daoCodeHash, hashType: Script.Data);
+    return shannonToCkb((await cellCollector.getWCKBBalance(address, wckbType.computeHash())).toRadixString(10))
+        .toString();
+  }
+
   Future<bool> save() async {
     SharedPreferences.setMockInitialValues({});
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getString(name) == null) {
-      return await prefs.setString(name, toJson());
-    }
-    return false;
+    print(address);
+    return await prefs.setString('wallet', toJson());
   }
 
-  static Future<Wallet> getWallet(String name) async {
+  static Future<Wallet> getWallet({String name}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return Wallet.fromJson(prefs.getString(name));
+    return Wallet.fromJson(prefs.getString(name ?? 'wallet'));
   }
 }

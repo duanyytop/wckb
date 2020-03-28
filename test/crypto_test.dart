@@ -7,7 +7,12 @@ void main() {
 
     test('Encrypt', () {
       var encrypted = encrypt('12345678', '12345678');
-      expect(encrypted.isNotEmpty, true);
+      expect(encrypted, '0x27553fc7c555affc28190a8e4dd39599');
+    });
+
+    test('Decrypt', () {
+      var origin = decrypt('0x27553fc7c555affc28190a8e4dd39599', '12345678');
+      expect(origin, '12345678');
     });
   });
 }
