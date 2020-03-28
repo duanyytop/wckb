@@ -13,3 +13,7 @@ Wrapped Nervos DAO CKB Application
 ## WCKB Transfer
 
 ![wckb transfer image](./images/wckb_transfer.jpg)
+
+## License
+
+**MIT**
