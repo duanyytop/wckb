@@ -9,9 +9,16 @@ class Transfer extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: TransferPage(),
-    );
+    return Scaffold(
+        backgroundColor: Color(0xff3c3e45),
+        appBar: AppBar(
+          title: const Text('WCKB Transfer'),
+          backgroundColor: Color(TitleBarColor),
+          iconTheme: IconThemeData(
+            color: Colors.white, //change your color here
+          ),
+        ),
+        body: TransferPage());
   }
 }
 
@@ -30,46 +37,44 @@ class _TransferPageState extends State<TransferPage> {
   Widget build(BuildContext context) {
     _screenWidth = MediaQuery.of(context).size.width;
     _screenHeight = MediaQuery.of(context).size.height;
-    return Scaffold(
-        backgroundColor: Color(0xff3c3e45),
-        body: Container(
-            width: _screenWidth,
-            height: _screenHeight,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                mainPenal(Column(
+    return Container(
+        width: _screenWidth,
+        height: _screenHeight - 40,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            mainPenal(Column(
+              children: <Widget>[
+                Row(
                   children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        new GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _tab = Tab.Swap;
-                              });
-                            },
-                            child: tabWidget(_tab == Tab.Swap, 'Swap')),
-                        new GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _tab = Tab.Send;
-                              });
-                            },
-                            child: tabWidget(_tab == Tab.Send, 'Send'))
-                      ],
-                    ),
-                    _tab == Tab.Swap
-                        ? swapWidget(_swap, () {
-                            setState(() {
-                              _swap = _swap == Swap.ToCKB ? Swap.ToWCKB : Swap.ToCKB;
-                            });
-                          })
-                        : transferWidget(),
+                    new GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _tab = Tab.Swap;
+                          });
+                        },
+                        child: tabWidget(_tab == Tab.Swap, 'Swap')),
+                    new GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _tab = Tab.Send;
+                          });
+                        },
+                        child: tabWidget(_tab == Tab.Send, 'Send'))
                   ],
-                )),
-                balanceWidget('1223434.3434', '2343434.45656', '12334')
+                ),
+                _tab == Tab.Swap
+                    ? swapWidget(_swap, () {
+                        setState(() {
+                          _swap = _swap == Swap.ToCKB ? Swap.ToWCKB : Swap.ToCKB;
+                        });
+                      })
+                    : transferWidget(),
               ],
-            )));
+            )),
+            balanceWidget('1223434.3434', '2343434.45656', '12334')
+          ],
+        ));
   }
 }
 
@@ -112,7 +117,7 @@ Widget swapWidget(Swap swap, Function switchSwap) {
                   switchSwap();
                 },
                 child: Image(
-                  image: AssetImage('assets/images/transfer.jpg'),
+                  image: AssetImage('assets/images/swap.png'),
                 )),
           ),
         ),

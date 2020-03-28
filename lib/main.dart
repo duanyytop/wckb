@@ -36,9 +36,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
         backgroundColor: Color(0xff3c3e45),
+        appBar: AppBar(title: const Text('WCKB Wallet'), backgroundColor: Color(TitleBarColor)),
         body: Container(
             width: _screenWidth,
-            height: _screenHeight,
+            height: _screenHeight - 100,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
