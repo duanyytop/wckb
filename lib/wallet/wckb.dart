@@ -39,8 +39,8 @@ Future<Transaction> generateWckbTx(Api api, BigInt wckbAmount, String privateKey
   var wckbType = Script(codeHash: WCKB_CODE_HASH, args: daoCodeHash, hashType: Script.Data);
   var txUtils = CollectUtils(api);
 
-  var cellOutputs = txUtils.generateOutputs(
-      [Receiver(address, WCKB_TRANSFER_SUM_CAPACITY - wckbAmount), Receiver(address, wckbAmount)], address);
+  var cellOutputs =
+      txUtils.generateOutputs([Receiver(address, wckbAmount), Receiver(address, WCKB_TRANSFER_DAO_CAPACITY)], address);
 
   cellOutputs[0].type = daoType;
   cellOutputs[0].lock = Script(
@@ -52,7 +52,7 @@ Future<Transaction> generateWckbTx(Api api, BigInt wckbAmount, String privateKey
 
   var cellOutputsData = [
     NERVOS_DAO_DATA,
-    '${listToHex(UInt128(WCKB_TRANSFER_SUM_CAPACITY - wckbAmount).toBytes())}${cleanHexPrefix(NERVOS_DAO_DATA)}',
+    '${listToHex(UInt128(wckbAmount).toBytes())}${cleanHexPrefix(NERVOS_DAO_DATA)}',
     '0x'
   ];
 

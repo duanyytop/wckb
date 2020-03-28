@@ -28,6 +28,6 @@ final String ALWAYS_SUCCESS_CODE_HASH = '0x56806108025878f143d767a5e642f83b3043b
 final String ALWAYS_SUCCESS_OUT_POINT_TX_HASH = '0x85728ac46bb61963bcb80bca6fc200bdd4e4330dee89478de4c8df5a915eee37';
 final BigInt WCKB_MIN_CELL_CAPACITY = ckbToShannon(number: 150);
 final BigInt WCKB_TRANSFER_CAPACITY = ckbToShannon(number: 149);
-final BigInt WCKB_TRANSFER_SUM_CAPACITY = ckbToShannon(number: 600);
+final BigInt WCKB_TRANSFER_DAO_CAPACITY = ckbToShannon(number: 200);
 final String WCKB_CODE_HASH = '0x90de6515262517d972127ca94ff6eb9bf94ac4d79dde01abcecbf56305fc5965';
 final String WCKB_OUT_POINT_TX_HASH = '0x0d4d8ab43cdbc6ed649cd25070373103ca990c3a3b003f8e7650aa66592da5f9';
