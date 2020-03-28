@@ -5,16 +5,19 @@ import 'package:ckb_sdk_dart/ckb_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:wckb/components/components.dart';
 import 'package:wckb/utils/const.dart';
+import 'package:wckb/wallet/wallet.dart';
 
 var _screenWidth = 0.0;
 var _screenHeight = 0.0;
 final _api = Api('http://localhost:8114');
 Timer _timer;
+var _walletName = '';
 
 class Transfer extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    _walletName = ModalRoute.of(context).settings.arguments;
     return Scaffold(
         backgroundColor: Color(0xff3c3e45),
         appBar: AppBar(
@@ -39,7 +42,8 @@ class _TransferPageState extends State<TransferPage> {
   Tab _tab = Tab.Swap;
   Swap _swap = Swap.ToWCKB;
   String _blockNumber = '0';
-  String ckbBalance = '0';
+  String _ckbBalance = '0';
+  Wallet _wallet;
 
   @override
   void initState() {
@@ -53,6 +57,17 @@ class _TransferPageState extends State<TransferPage> {
       _api.getTipBlockNumber().then((blockNumber) {
         setState(() {
           _blockNumber = '${hexToInt(blockNumber)}';
+        });
+      });
+    });
+
+    Wallet.getWallet(_walletName).then((wallet) {
+      setState(() {
+        _wallet = wallet;
+      });
+      _wallet.getCKBBalance(_api).then((balance) {
+        setState(() {
+          _ckbBalance = balance;
         });
       });
     });
@@ -105,7 +120,7 @@ class _TransferPageState extends State<TransferPage> {
                     : transferWidget(),
               ],
             )),
-            balanceWidget('1223434.3434', '2343434.45656', _blockNumber)
+            balanceWidget(_ckbBalance, '1223434.3434', _blockNumber)
           ],
         ));
   }
