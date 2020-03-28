@@ -1,9 +1,14 @@
+import 'dart:async';
+
+import 'package:ckb_sdk_dart/ckb_core.dart';
+import 'package:ckb_sdk_dart/ckb_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:wckb/components/components.dart';
 import 'package:wckb/utils/const.dart';
 
 var _screenWidth = 0.0;
 var _screenHeight = 0.0;
+final _api = Api('http://localhost:8114');
 
 class Transfer extends StatelessWidget {
   // This widget is the root of your application.
@@ -32,6 +37,25 @@ class TransferPage extends StatefulWidget {
 class _TransferPageState extends State<TransferPage> {
   Tab _tab = Tab.Swap;
   Swap _swap = Swap.ToWCKB;
+  String _blockNumber = '0';
+
+  @override
+  void initState() {
+    _api.getTipBlockNumber().then((blockNumber) {
+      setState(() {
+        _blockNumber = '${hexToInt(blockNumber)}';
+      });
+    });
+    Timer.periodic(Duration(seconds: 5), (Timer timer) {
+      _api.getTipBlockNumber().then((blockNumber) {
+        setState(() {
+          _blockNumber = '${hexToInt(blockNumber)}';
+        });
+      });
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +96,7 @@ class _TransferPageState extends State<TransferPage> {
                     : transferWidget(),
               ],
             )),
-            balanceWidget('1223434.3434', '2343434.45656', '12334')
+            balanceWidget('1223434.3434', '2343434.45656', _blockNumber)
           ],
         ));
   }
