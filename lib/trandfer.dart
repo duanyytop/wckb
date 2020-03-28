@@ -1,34 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:wckb/components/components.dart';
-import 'package:wckb/trandfer.dart';
 import 'package:wckb/utils/const.dart';
 
 var _screenWidth = 0.0;
 var _screenHeight = 0.0;
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
+class Transfer extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyHomePage(),
+      home: TransferPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+class TransferPage extends StatefulWidget {
+  TransferPage({Key key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _TransferPageState createState() => _TransferPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  Tab _tab = Tab.Create;
+class _TransferPageState extends State<TransferPage> {
+  Tab _tab = Tab.Swap;
 
   @override
   Widget build(BuildContext context) {
@@ -49,29 +44,92 @@ class _MyHomePageState extends State<MyHomePage> {
                         new GestureDetector(
                             onTap: () {
                               setState(() {
-                                _tab = Tab.Create;
+                                _tab = Tab.Swap;
                               });
                             },
-                            child: tabWidget(_tab == Tab.Create, 'Create a Wallet')),
+                            child: tabWidget(_tab == Tab.Swap, 'Swap')),
                         new GestureDetector(
                             onTap: () {
                               setState(() {
-                                _tab = Tab.Import;
+                                _tab = Tab.Send;
                               });
                             },
-                            child: tabWidget(_tab == Tab.Import, 'Import Wallet Mnemonic'))
+                            child: tabWidget(_tab == Tab.Send, 'Send'))
                       ],
                     ),
-                    _tab == Tab.Create ? createWalletWidget(context) : importMnemonicWidget(),
+                    _tab == Tab.Swap ? swapWidget() : transferWidget(),
                   ],
                 )),
-                welcomeWCKB()
+                balanceWidget('1223434.3434', '2343434.45656', '12334')
               ],
             )));
   }
 }
 
-Widget createWalletWidget(BuildContext context) {
+Widget swapWidget() {
+  return Column(
+    children: <Widget>[
+      Padding(
+        padding: EdgeInsets.only(top: 48),
+        child: Container(
+            width: 490,
+            height: 73,
+            decoration: BoxDecoration(
+                border: new Border.all(color: Color(GRAY_COLOR), width: 1),
+                color: Color(0x0ff1c1d20),
+                borderRadius: new BorderRadius.all(Radius.circular(45))),
+            child: inputWidget('Wallet Name *', false, (value) {
+              print(value);
+            })),
+      ),
+      Padding(
+        padding: EdgeInsets.only(top: 14),
+        child: Center(
+          child: SizedBox(
+            width: 34,
+            height: 34,
+            child: Image(
+              image: AssetImage('assets/images/transfer.jpg'),
+            ),
+          ),
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.only(top: 14),
+        child: Container(
+          width: 490,
+          height: 73,
+          decoration: BoxDecoration(
+              border: new Border.all(color: Color(GRAY_COLOR), width: 1),
+              color: Color(0x0ff1c1d20),
+              borderRadius: new BorderRadius.all(Radius.circular(45))),
+          child: inputWidget('Confirm Password *', true, (value) {
+            print(value);
+          }),
+        ),
+      ),
+      Padding(
+          padding: EdgeInsets.only(top: 30),
+          child: SizedBox(
+            width: 180,
+            height: 40,
+            child: RaisedButton(
+              textColor: Colors.white,
+              onPressed: () {},
+              color: Color(GREEN_COLOR),
+              shape: new RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(33.0), side: BorderSide(color: Color(GREEN_COLOR))),
+              child: Text(
+                "Confirm",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+          ))
+    ],
+  );
+}
+
+Widget transferWidget() {
   return Column(
     children: <Widget>[
       Padding(
@@ -122,129 +180,12 @@ Widget createWalletWidget(BuildContext context) {
             height: 40,
             child: RaisedButton(
               textColor: Colors.white,
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Transfer()));
-              },
+              onPressed: () {},
               color: Color(GREEN_COLOR),
               shape: new RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(33.0), side: BorderSide(color: Color(GREEN_COLOR))),
               child: Text(
                 "Confirm",
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ),
-          ))
-    ],
-  );
-}
-
-Widget confirmMnemonicWidget() {
-  return Column(
-    children: <Widget>[
-      Padding(
-        padding: EdgeInsets.only(top: 78),
-        child: Text(
-          "Your new wallet mnemonic has been generated",
-          style: TextStyle(color: Color(WHITE_COLOR), fontSize: 18),
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.only(top: 48),
-        child: Container(
-            width: 490,
-            height: 90,
-            decoration: BoxDecoration(
-                border: new Border.all(color: Color(GRAY_COLOR), width: 1),
-                color: Color(0x0ff1c1d20),
-                borderRadius: new BorderRadius.all(Radius.circular(45))),
-            child: Padding(
-                padding: EdgeInsets.only(left: 30, right: 30, top: 20),
-                child: Text(
-                  'Mnemonic words',
-                  style: TextStyle(color: Color(WHITE_COLOR)),
-                ))),
-      ),
-      Padding(
-        padding: EdgeInsets.only(top: 12),
-        child: Text(
-          "Write down your wallet mnemonic and save it in a safe place.",
-          style: TextStyle(color: Color(GREEN_COLOR), fontSize: 18),
-        ),
-      ),
-      Padding(
-          padding: EdgeInsets.only(top: 30),
-          child: SizedBox(
-            width: 180,
-            height: 40,
-            child: RaisedButton(
-              textColor: Colors.white,
-              onPressed: () {},
-              color: Color(GREEN_COLOR),
-              shape: new RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(33.0), side: BorderSide(color: Color(GREEN_COLOR))),
-              child: Text(
-                "Next",
-                style: TextStyle(color: Colors.white, fontSize: 18),
-              ),
-            ),
-          ))
-    ],
-  );
-}
-
-Widget importMnemonicWidget() {
-  return Column(
-    children: <Widget>[
-      Padding(
-        padding: EdgeInsets.only(top: 40),
-        child: Text(
-          "Input your wallet mnemonic words",
-          style: TextStyle(color: Color(WHITE_COLOR), fontSize: 18),
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.only(top: 48),
-        child: Container(
-            width: 490,
-            height: 90,
-            decoration: BoxDecoration(
-                border: new Border.all(color: Color(GRAY_COLOR), width: 1),
-                color: Color(0x0ff1c1d20),
-                borderRadius: new BorderRadius.all(Radius.circular(45))),
-            child: Padding(
-                padding: EdgeInsets.only(left: 30, right: 30, top: 20),
-                child: Text(
-                  'Mnemonic words',
-                  style: TextStyle(color: Color(WHITE_COLOR)),
-                ))),
-      ),
-      Padding(
-        padding: EdgeInsets.only(top: 14),
-        child: Container(
-          width: 490,
-          height: 73,
-          decoration: BoxDecoration(
-              border: new Border.all(color: Color(GRAY_COLOR), width: 1),
-              color: Color(0x0ff1c1d20),
-              borderRadius: new BorderRadius.all(Radius.circular(45))),
-          child: inputWidget('Password *', true, (value) {
-            print(value);
-          }),
-        ),
-      ),
-      Padding(
-          padding: EdgeInsets.only(top: 30),
-          child: SizedBox(
-            width: 180,
-            height: 40,
-            child: RaisedButton(
-              textColor: Colors.white,
-              onPressed: () {},
-              color: Color(GREEN_COLOR),
-              shape: new RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(33.0), side: BorderSide(color: Color(GREEN_COLOR))),
-              child: Text(
-                "Next",
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
@@ -279,4 +220,4 @@ Widget inputWidget(String title, bool isPassword, Function onChanged) {
       ));
 }
 
-enum Tab { Create, Import }
+enum Tab { Swap, Send }
