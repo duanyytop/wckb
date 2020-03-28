@@ -9,6 +9,7 @@ import 'package:wckb/utils/const.dart';
 var _screenWidth = 0.0;
 var _screenHeight = 0.0;
 final _api = Api('http://localhost:8114');
+Timer _timer;
 
 class Transfer extends StatelessWidget {
   // This widget is the root of your application.
@@ -38,6 +39,7 @@ class _TransferPageState extends State<TransferPage> {
   Tab _tab = Tab.Swap;
   Swap _swap = Swap.ToWCKB;
   String _blockNumber = '0';
+  String ckbBalance = '0';
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class _TransferPageState extends State<TransferPage> {
       });
     });
     Timer.periodic(Duration(seconds: 5), (Timer timer) {
+      _timer = timer;
       _api.getTipBlockNumber().then((blockNumber) {
         setState(() {
           _blockNumber = '${hexToInt(blockNumber)}';
@@ -55,6 +58,12 @@ class _TransferPageState extends State<TransferPage> {
     });
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   @override

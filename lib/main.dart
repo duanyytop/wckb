@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 import 'package:wckb/components/components.dart';
 import 'package:wckb/trandfer.dart';
 import 'package:wckb/utils/const.dart';
+import 'package:wckb/wallet/mnemonic.dart';
+import 'package:wckb/wallet/wallet.dart';
 
 var _screenWidth = 0.0;
 var _screenHeight = 0.0;
@@ -27,8 +30,14 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+Wallet _wallet;
+String _tempPassword = '';
+String _tempConfirmPassword = '';
+String _mnemonic = '';
+
 class _MyHomePageState extends State<MyHomePage> {
   Tab _tab = Tab.Create;
+  bool _showMnemonic = false;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +72,25 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: tabWidget(_tab == Tab.Import, 'Import Wallet Mnemonic'))
                       ],
                     ),
-                    _tab == Tab.Create ? createWalletWidget(context) : importMnemonicWidget(),
+                    _tab == Tab.Create
+                        ? (_showMnemonic
+                            ? confirmMnemonicWidget(context)
+                            : createWalletWidget(context, () {
+                                if (_tempPassword.length < 8) {
+                                  Toast.show("Password length must be bigger than 8", context,
+                                      duration: Toast.LENGTH_SHORT, gravity: Toast.CENTER);
+                                } else if (_tempPassword != _tempConfirmPassword) {
+                                  Toast.show("Password is not same", context,
+                                      duration: Toast.LENGTH_SHORT, gravity: Toast.CENTER);
+                                } else {
+                                  _mnemonic = generateMnemonic(_tempPassword);
+                                  print(_mnemonic);
+                                  setState(() {
+                                    _showMnemonic = true;
+                                  });
+                                }
+                              }))
+                        : importMnemonicWidget(),
                   ],
                 )),
                 welcomeWCKB()
@@ -72,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-Widget createWalletWidget(BuildContext context) {
+Widget createWalletWidget(BuildContext context, Function nextAction) {
   return Column(
     children: <Widget>[
       Padding(
@@ -85,7 +112,7 @@ Widget createWalletWidget(BuildContext context) {
                 color: Color(0x0ff1c1d20),
                 borderRadius: new BorderRadius.all(Radius.circular(45))),
             child: inputWidget('Wallet Name *', false, (value) {
-              print(value);
+              _wallet.name = value;
             })),
       ),
       Padding(
@@ -98,7 +125,7 @@ Widget createWalletWidget(BuildContext context) {
               color: Color(0x0ff1c1d20),
               borderRadius: new BorderRadius.all(Radius.circular(45))),
           child: inputWidget('Password *', true, (value) {
-            print(value);
+            _tempPassword = value;
           }),
         ),
       ),
@@ -112,7 +139,7 @@ Widget createWalletWidget(BuildContext context) {
               color: Color(0x0ff1c1d20),
               borderRadius: new BorderRadius.all(Radius.circular(45))),
           child: inputWidget('Confirm Password *', true, (value) {
-            print(value);
+            _tempConfirmPassword = value;
           }),
         ),
       ),
@@ -124,7 +151,7 @@ Widget createWalletWidget(BuildContext context) {
             child: RaisedButton(
               textColor: Colors.white,
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Transfer()));
+                nextAction();
               },
               color: Color(GREEN_COLOR),
               shape: new RoundedRectangleBorder(
@@ -139,7 +166,7 @@ Widget createWalletWidget(BuildContext context) {
   );
 }
 
-Widget confirmMnemonicWidget() {
+Widget confirmMnemonicWidget(BuildContext context) {
   return Column(
     children: <Widget>[
       Padding(
@@ -161,8 +188,8 @@ Widget confirmMnemonicWidget() {
             child: Padding(
                 padding: EdgeInsets.only(left: 30, right: 30, top: 20),
                 child: Text(
-                  'Mnemonic words',
-                  style: TextStyle(color: Color(WHITE_COLOR)),
+                  _mnemonic,
+                  style: TextStyle(color: Colors.white, letterSpacing: 1.0, height: 1.5),
                 ))),
       ),
       Padding(
@@ -179,7 +206,10 @@ Widget confirmMnemonicWidget() {
             height: 40,
             child: RaisedButton(
               textColor: Colors.white,
-              onPressed: () {},
+              onPressed: () async {
+                _wallet.account = await importWalletWithMnemonic(_mnemonic, _tempPassword);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Transfer()));
+              },
               color: Color(GREEN_COLOR),
               shape: new RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(33.0), side: BorderSide(color: Color(GREEN_COLOR))),
@@ -212,12 +242,9 @@ Widget importMnemonicWidget() {
                 border: new Border.all(color: Color(GRAY_COLOR), width: 1),
                 color: Color(0x0ff1c1d20),
                 borderRadius: new BorderRadius.all(Radius.circular(45))),
-            child: Padding(
-                padding: EdgeInsets.only(left: 30, right: 30, top: 20),
-                child: Text(
-                  'Mnemonic words',
-                  style: TextStyle(color: Color(WHITE_COLOR)),
-                ))),
+            child: inputWidget('', false, (value) {
+              _mnemonic = value;
+            })),
       ),
       Padding(
         padding: EdgeInsets.only(top: 14),

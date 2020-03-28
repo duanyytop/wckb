@@ -23,6 +23,7 @@ dependencies:
   bitcoin_flutter: ^2.0.0
   encrypt: ^4.0.0
   ckb_sdk_dart: ^0.30.2
+  toast: ^0.1.5
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -32,6 +33,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  test: ^1.6.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
